@@ -1,0 +1,7 @@
+extends default.pug
+
+block content
+  each message in messages
+    div
+      h3= message.author
+      p= message.message
