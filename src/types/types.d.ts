@@ -1,16 +1,17 @@
 declare global {
   namespace Express {
-    interface User {
-      username: string;
-      id: number;
-      password: string;
-    }
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    interface User extends Omit<AuthUser, 'password'> {}
   }
 
-  interface PublicUserData {
+  type UserRole = 'Admin' | 'User';
+
+  interface AuthUser {
     username: string;
     id: number;
-    joinDate?: Date;
+    password: string;
+    role: UserRole;
+    joinedDate: Date;
   }
 }
 

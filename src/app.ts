@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import passport from './config/passport';
 import env from './env';
 import httpLogger from './middlewares/httpLogger';
+import ensureUserSafe from './middlewares/safeUser';
 import homeRouter from './routes/home';
 
 const app = express();
@@ -50,6 +51,7 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(ensureUserSafe);
 
 app.use('/', homeRouter);
 

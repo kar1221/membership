@@ -1,3 +1,5 @@
+import { validationResult } from 'express-validator';
+
 import type { NextFunction, Request, Response } from 'express';
 
 function renderSignupForm(req: Request, res: Response): void {
@@ -10,6 +12,7 @@ function renderSignupForm(req: Request, res: Response): void {
 }
 
 async function handleSignUp(req: Request, res: Response, next: NextFunction) {
+
 }
 
 export { handleSignUp, renderSignupForm };
