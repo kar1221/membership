@@ -17,10 +17,6 @@ const logger = winston.createLogger({
   transports: [
     new winston.transports.Console(),
     new winston.transports.File({
-      filename: `${logDir}/combined.${serverStartedTimestamp}.log`,
-      level: 'info'
-    }),
-    new winston.transports.File({
       filename: `${logDir}/.${serverStartedTimestamp}.log`,
       level: 'error'
     })

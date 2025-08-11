@@ -16,8 +16,21 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.json());
-app.use(cors());
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        scriptSrc: ["'self'", 'cdn.jsdelivr.net'],
+        styleSrc: ["'self'", 'cdn.jsdelivr.net', 'fonts.googleapis.com']
+      }
+    }
+  })
+);
+app.use(
+  cors({
+    origin: ['cdn.jsdelivr.net', 'fonts.googleapis.com']
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));

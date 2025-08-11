@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { z } from 'zod/v4';
 
-import logger from './logger.js';
+import logger from './logger';
 
 const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
