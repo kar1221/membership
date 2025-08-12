@@ -1,0 +1,12 @@
+extends ./layout/default.pug
+
+block content
+  div(class='flex h-screen w-dvw items-center justify-center')
+    div(class='card bg-base-100 card-xl shadow-xl')
+      div(class='card-body items-center')
+        h2(class='card-title text-2xl') Sign Up
+        div(class='grid auto-rows-fr grid-cols-2')
+          fieldset(class='fieldset')
+            legend(class='fieldset-legend') First Name
+            input(type='text', class='input')
+            p(class='label text-warning') Required

@@ -4,6 +4,6 @@
   "bracketSameLine": false,
   "singleQuote": true,
   "trailingComma": "none",
-  "plugins": ["@prettier/plugin-pug"],
+  "plugins": ["@prettier/plugin-pug", "prettier-plugin-tailwindcss"],
   "pugClassNotation": "attribute"
 }

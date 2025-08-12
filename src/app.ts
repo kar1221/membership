@@ -10,6 +10,7 @@ import env from './env';
 import httpLogger from './middlewares/httpLogger';
 import ensureUserSafe from './middlewares/safeUser';
 import homeRouter from './routes/home';
+import signUpRouter from './routes/signUp';
 
 const app = express();
 
@@ -54,5 +55,6 @@ app.use(passport.session());
 app.use(ensureUserSafe);
 
 app.use('/', homeRouter);
+app.use('/signup', signUpRouter);
 
 export default app;
