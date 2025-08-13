@@ -1,7 +1,9 @@
+import type { AuthStoreReturn } from '@/types/authStoreReturn';
 import type { ServerResponse } from '@/types/serverResponse';
-import { useFetch } from '@vueuse/core';
+import authFetch from '@/utils/authFetch';
 import { defineStore } from 'pinia';
 import type { User } from 'shared-types';
+import { useFetch } from '@vueuse/core';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -22,39 +24,85 @@ export const useAuthStore = defineStore('auth', {
       password?: string;
       firstName?: string;
       lastName?: string;
-    }): Promise<{ success: boolean; error?: string | null }> {
+    }): Promise<AuthStoreReturn> {
       this.isLoading = true;
       this.error = null;
 
-      const url =
-        import.meta.env.MODE === 'production' ? '/api/auth/signup' : 'http://localhost:3000/api/auth/signup';
-
-      const { error, data, response } = await useFetch<ServerResponse<{ user?: User }>>(url)
+      const { data, statusCode } = await authFetch('/signup')
         .post({
           firstName: userData.firstName,
           lastName: userData.lastName,
           username: userData.username,
           password: userData.password,
         })
-        .json();
+        .json<ServerResponse<{ user?: User }>>();
 
-
-      if (data.value) {
-        this.user = data.value.data.user;
-        this.isAuthenticated = true;
+      if (!data.value) {
         this.isLoading = false;
-        return { success: true };
+        return {
+          success: false,
+          error: "Unexpected Error. Server didn't return a value",
+        };
       }
 
-      if (error.value) {
-        const error = await response.value?.json() as ServerResponse<{user?: User}>;
-
+      if (statusCode.value && statusCode.value >= 400) {
         this.isLoading = false;
-        return { success: false, error: `Fetch Error ${error.message}` };
+        return {
+          success: false,
+          error: data.value.message,
+        };
+      }
+
+      this.isAuthenticated = true;
+      this.isLoading = false;
+      this.user = data.value.data.user;
+      return {
+        success: true,
+      };
+    },
+
+    async fetchUser(): Promise<AuthStoreReturn> {
+      this.isLoading = true;
+
+      console.log('before fetch');
+      const { statusCode, data } = await useFetch(
+        'http://localhost:3000/api/auth/user',
+        {
+          credentials: 'include',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+        { updateDataOnError: true },
+      )
+        .get()
+        .json<ServerResponse<{ user?: User }>>();
+
+      console.log('after fetch');
+
+      if (statusCode.value && statusCode.value > 400) {
+        this.isLoading = false;
+        return {
+          success: false,
+          error: data.value?.message,
+        };
+      }
+
+      if (!data.value) {
+        this.isLoading = false;
+        return {
+          success: false,
+          error: "Unexpected Error. Server didn't return a value",
+        };
       }
 
       this.isLoading = false;
-      return { success: false, error: 'Unexpected Error' };
+      this.user = data.value.data.user;
+      this.isAuthenticated = true;
+      return {
+        success: true,
+      };
     },
   },
 });

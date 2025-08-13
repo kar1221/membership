@@ -4,6 +4,7 @@ import { Strategy as LocalStrategy } from 'passport-local';
 
 import { fetchUserForAuth, fetchUserForSession } from '../db/queries';
 import IncorrectCredentialError from '../errors/IncorrectCredentialError';
+import logger from '../logger';
 
 passport.use(
   new LocalStrategy(async (username, password, done) => {
@@ -33,6 +34,7 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser<number>(async (id, done) => {
+  logger.debug('no');
   try {
     const user = await fetchUserForSession(id);
 

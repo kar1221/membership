@@ -54,6 +54,22 @@ async function handleSignup(
   }
 }
 
+async function getUser(req: Request, res: Response): Promise<void> {
+  if (req.isAuthenticated())
+    res.status(200).json({
+      message: 'Authenticated',
+      data: {
+        user: req.user
+      }
+    });
+  else
+    res.status(401).json({
+      message: 'Not Authenticated',
+      data: null
+    });
+}
+
 export default {
-  handleSignup
+  handleSignup,
+  getUser
 };

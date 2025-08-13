@@ -3,13 +3,31 @@ import { reactive } from 'vue';
 import * as z from 'zod';
 import { useAuthStore } from '@/stores/authStore';
 import { router } from '@/router';
+import type { FormSubmitEvent } from '@nuxt/ui';
 const auth = useAuthStore();
 
 const schema = z
   .object({
-    username: z.string().min(3).max(30),
-    firstName: z.string().min(1).max(30),
-    lastName: z.string().min(1).max(30),
+    username: z
+      .string()
+      .min(3, 'Username should be longer than 3 characters')
+      .max(30, 'Username should not be longer than 30 characters'),
+    firstName: z
+      .string()
+      .min(1, 'First name should be longer than 1 character')
+      .max(30, 'First name should not be longer than 30 characters ')
+      .regex(
+        /^[A-Za-zÀ-ÿ\s'-]+$/,
+        'First name can only contain letters, spaces, hyphens, and apostrophes.',
+      ),
+    lastName: z
+      .string()
+      .min(1, 'Last name should be longer than 1 character')
+      .max(30, 'Last name should not be longer than 30 characters ')
+      .regex(
+        /^[A-Za-zÀ-ÿ\s'-]+$/,
+        'Last name can only contain letters, spaces, hyphens, and apostrophes.',
+      ),
     password: z.string().min(8, 'Must be at least 8 characters'),
     confirmPassword: z.string().nonempty(),
   })
@@ -19,6 +37,7 @@ const schema = z
     },
     {
       message: "Password doesn't match.",
+      path: ['confirmPassword'],
     },
   );
 
@@ -36,36 +55,55 @@ const returnHome = async () => {
   await router.push('/');
 };
 
-const handleSignUp = async () => {
-  const result = schema.safeParse(state);
-
-  if (!result.success) {
-    const toast = useToast();
+const onSubmit = async (event: FormSubmitEvent<Schema>) => {
+  const toast = useToast();
+  if (auth.isLoggedIn) {
     toast.add({
-      title: "Error",
-      description: result.error.message,
-      color: 'error'
-    })
+      title: 'Already logged in',
+      description: "You've already logged in, redirecting you in 5 second...",
+      color: 'warning',
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    setTimeout(async (): Promise<void> => {
+      await router.push('/');
+    }, 5000);
 
     return;
-  };
+  }
 
-  const response = await auth.signUp({
-    username: state.username,
-    firstName: state.firstName,
-    lastName: state.lastName,
-    password: state.password,
+  const result = await auth.signUp({
+    firstName: event.data.firstName,
+    lastName: event.data.lastName,
+    username: event.data.username,
+    password: event.data.password,
   });
 
-  if (response.success) {
-    await router.push('/');
-  } else {
+  if (!result.success && result.error) {
+    toast.add({
+      title: 'Error',
+      description: result.error,
+      color: 'error',
+    });
+
+    return;
   }
+
+  toast.add({
+    title: 'Sign Up Succesful',
+    description: 'redirecting you in 5 second...',
+    color: 'success',
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  setTimeout(async () => {
+    await router.push('/');
+  }, 5000);
 };
 </script>
 
 <template>
-  <div class="flex h-full items-center justify-center">
+  <UContainer class="flex h-full items-center justify-center">
     <UCard class="max-w-xl shadow-xl" variant="outline">
       <template #header>
         <h2 class="font-primary text-center text-2xl font-bold">Sign Up</h2>
@@ -76,6 +114,7 @@ const handleSignUp = async () => {
         class="grid auto-cols-fr grid-cols-2 gap-4"
         :disabled="auth.isLoading"
         :validate-on="['blur', 'input', 'change']"
+        @submit="onSubmit"
       >
         <UFormField label="First Name" name="firstName">
           <UInput v-model="state.firstName" variant="soft"></UInput>
@@ -93,13 +132,11 @@ const handleSignUp = async () => {
         <UFormField label="Confirm Password" name="confirmPassword">
           <UInput v-model="state.confirmPassword" variant="soft" type="password"></UInput>
         </UFormField>
-      </UForm>
-      <template #footer>
-        <div class="flex justify-end gap-4">
-          <UButton @click="handleSignUp">Sign Up</UButton>
-          <UButton color="neutral" @click="returnHome">Cancel</UButton>
+        <div class="flex justify-end gap-4 col-span-2">
+          <UButton type="submit" class="cursor-pointer">Sign Up</UButton>
+          <UButton color="neutral" class="cursor-pointer" @click="returnHome">Cancel</UButton>
         </div>
-      </template>
+      </UForm>
     </UCard>
-  </div>
+  </UContainer>
 </template>

@@ -20,19 +20,33 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.json());
-// app.use(
-//   helmet({
-//     contentSecurityPolicy: {
-//       directives: {
-//         scriptSrc: ["'self'", 'cdn.jsdelivr.net'],
-//         styleSrc: ["'self'", 'cdn.jsdelivr.net', 'fonts.googleapis.com']
-//       }
-//     }
-//   })
-// );
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        scriptSrc: [
+          "'self'",
+          'cdn.jsdelivr.net',
+          env.NODE_ENV === 'production' ? '' : 'http://localhost:5173'
+        ],
+        styleSrc: [
+          "'self'",
+          'cdn.jsdelivr.net',
+          'fonts.googleapis.com',
+          env.NODE_ENV === 'production' ? '' : 'http://localhost:5173'
+        ]
+      }
+    }
+  })
+);
 app.use(
   cors({
-    // origin: ['cdn.jsdelivr.net', 'fonts.googleapis.com']
+    origin: [
+      'cdn.jsdelivr.net',
+      'fonts.googleapis.com',
+      env.NODE_ENV === 'production' ? '' : 'http://localhost:5173'
+    ],
+    credentials: true
   })
 );
 app.use(express.urlencoded({ extended: true }));
@@ -66,7 +80,10 @@ if (env.NODE_ENV === 'production') {
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   logger.error(err);
-  res.status(500).send('Internal Error');
+  res.status(500).json({
+    message: err.message,
+    data: null
+  });
 });
 
 export default app;
