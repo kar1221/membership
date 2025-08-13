@@ -104,7 +104,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 
 <template>
   <UContainer class="flex h-full items-center justify-center">
-    <UCard class="max-w-xl shadow-xl" variant="outline">
+    <UCard class="max-w-xl shadow-2xl" variant="outline">
       <template #header>
         <h2 class="font-primary text-center text-2xl font-bold">Sign Up</h2>
       </template>
@@ -116,21 +116,21 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
         :validate-on="['blur', 'input', 'change']"
         @submit="onSubmit"
       >
-        <UFormField label="First Name" name="firstName">
-          <UInput v-model="state.firstName" variant="soft"></UInput>
+        <UFormField size='xl' label="First Name" name="firstName">
+          <UInput v-model="state.firstName" size="xl" variant="soft"></UInput>
         </UFormField>
-        <UFormField label="Last Name" name="lastName">
-          <UInput v-model="state.lastName" variant="soft"></UInput>
+        <UFormField size='xl' label="Last Name" name="lastName">
+          <UInput v-model="state.lastName" size='xl' variant="soft"></UInput>
         </UFormField>
-        <UFormField label="Username" name="username" class="col-span-2">
-          <UInput v-model="state.username" variant="soft" class="w-full"></UInput>
+        <UFormField size='xl' label="Username" name="username" class="col-span-2">
+          <UInput v-model="state.username" size='xl' variant="soft" class="w-full"></UInput>
         </UFormField>
 
-        <UFormField label="Password" name="password">
-          <UInput v-model="state.password" variant="soft" type="password"></UInput>
+        <UFormField size='xl' label="Password" name="password">
+          <UInput v-model="state.password" size='xl' variant="soft" type="password"></UInput>
         </UFormField>
-        <UFormField label="Confirm Password" name="confirmPassword">
-          <UInput v-model="state.confirmPassword" variant="soft" type="password"></UInput>
+        <UFormField size='xl' label="Confirm Password" name="confirmPassword">
+          <UInput v-model="state.confirmPassword" size='xl' variant="soft" type="password"></UInput>
         </UFormField>
         <div class="flex justify-end gap-4 col-span-2">
           <UButton type="submit" class="cursor-pointer">Sign Up</UButton>

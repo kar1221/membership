@@ -17,6 +17,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@iconify-json/fa7-solid": "^1.2.0",
     "@nuxt/ui": "^3.3.0",
     "@vueuse/core": "^13.6.0",
     "axios": "^1.11.0",

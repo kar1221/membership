@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { validationResult } from 'express-validator';
 
-import { createUser } from '../db/queries';
+import { createUser, fetchUserForAuth } from '../db/queries';
 
 import type { NextFunction, Request, Response } from 'express';
 
@@ -15,6 +15,17 @@ async function handleSignup(
   if (!errors.isEmpty()) {
     res.status(400).json({
       message: errors.array().map((err) => err.msg as string),
+      data: null
+    });
+
+    return;
+  }
+
+  const existingUser = await fetchUserForAuth(req.body.username);
+
+  if (existingUser) {
+    res.status(400).json({
+      message: 'Username already exists',
       data: null
     });
 
@@ -69,7 +80,26 @@ async function getUser(req: Request, res: Response): Promise<void> {
     });
 }
 
+async function logout(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  req.logout((err) => {
+    if (err) {
+      next(err);
+      return;
+    }
+
+    res.status(200).json({
+      message: 'Logout',
+      data: null
+    });
+  });
+}
+
 export default {
   handleSignup,
-  getUser
+  getUser,
+  logout
 };

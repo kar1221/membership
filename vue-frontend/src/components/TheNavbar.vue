@@ -5,13 +5,17 @@ const auth = useAuthStore();
 </script>
 
 <template>
-  <nav class="flex items-center justify-between p-4">
+  <nav class="flex items-center justify-between p-4 shadow-md">
     <RouterLink to="/" class="font-logo text-primary text-3xl">Membership</RouterLink>
     <div>
-      <p v-if="auth.isAuthenticated">
-        {{ auth.user!.username }}
-      </p>
-      <RouterLink v-else to="signup">Sign Up</RouterLink>
+      <div v-if="auth.isAuthenticated" class="flex items-center justify-center gap-2 text-lg">
+        <UIcon name="fa7-solid:user-alt"></UIcon>
+        <p>{{ auth.currentUser!.username }}</p>
+      </div>
+      <RouterLink v-else to="signup" class="flex items-center justify-center gap-2 text-lg">
+        <UIcon name="fa7-solid:user-plus"></UIcon>
+        <p>Sign Up</p>
+      </RouterLink>
     </div>
   </nav>
 </template>

@@ -3,7 +3,6 @@ import type { ServerResponse } from '@/types/serverResponse';
 import authFetch from '@/utils/authFetch';
 import { defineStore } from 'pinia';
 import type { User } from 'shared-types';
-import { useFetch } from '@vueuse/core';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -64,22 +63,9 @@ export const useAuthStore = defineStore('auth', {
     async fetchUser(): Promise<AuthStoreReturn> {
       this.isLoading = true;
 
-      console.log('before fetch');
-      const { statusCode, data } = await useFetch(
-        'http://localhost:3000/api/auth/user',
-        {
-          credentials: 'include',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-        { updateDataOnError: true },
-      )
+      const { statusCode, data } = await authFetch('/user')
         .get()
         .json<ServerResponse<{ user?: User }>>();
-
-      console.log('after fetch');
 
       if (statusCode.value && statusCode.value > 400) {
         this.isLoading = false;

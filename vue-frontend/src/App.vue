@@ -3,11 +3,12 @@ import { onMounted } from 'vue';
 import { useAuthStore } from './stores/authStore';
 
 const auth = useAuthStore();
+
+onMounted(async () => await auth.fetchUser());
 </script>
 
 <template>
   <UApp>
     <RouterView />
-    <UButton @click="auth.fetchUser()">Fetch</UButton>
   </UApp>
 </template>
