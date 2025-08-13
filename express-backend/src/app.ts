@@ -8,8 +8,11 @@ import helmet from 'helmet';
 import apiRouter from './api';
 import passport from './config/passport';
 import env from './env';
+import logger from './logger';
 import httpLogger from './middlewares/httpLogger';
 import ensureUserSafe from './middlewares/safeUser';
+
+import type { NextFunction, Request, Response } from 'express';
 
 const app = express();
 
@@ -17,19 +20,19 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.json());
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        scriptSrc: ["'self'", 'cdn.jsdelivr.net'],
-        styleSrc: ["'self'", 'cdn.jsdelivr.net', 'fonts.googleapis.com']
-      }
-    }
-  })
-);
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       directives: {
+//         scriptSrc: ["'self'", 'cdn.jsdelivr.net'],
+//         styleSrc: ["'self'", 'cdn.jsdelivr.net', 'fonts.googleapis.com']
+//       }
+//     }
+//   })
+// );
 app.use(
   cors({
-    origin: ['cdn.jsdelivr.net', 'fonts.googleapis.com']
+    // origin: ['cdn.jsdelivr.net', 'fonts.googleapis.com']
   })
 );
 app.use(express.urlencoded({ extended: true }));
@@ -60,5 +63,10 @@ if (env.NODE_ENV === 'production') {
     res.sendFile(path.join(__dirname, '../../vue-frontend/dist/index.html'));
   });
 }
+
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  logger.error(err);
+  res.status(500).send('Internal Error');
+});
 
 export default app;

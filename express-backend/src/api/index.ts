@@ -1,10 +1,9 @@
 import { Router } from 'express';
 
-import authContoller from '../controllers/authContoller';
-import signUpValidationRule from '../validator/signUpValidator';
+import authRoute from './auth';
 
 const apiRouter = Router();
 
-apiRouter.post('/signup', signUpValidationRule, authContoller.handleSignup);
+apiRouter.use('/auth', authRoute);
 
 export default apiRouter;

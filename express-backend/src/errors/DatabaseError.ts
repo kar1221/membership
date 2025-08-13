@@ -1,12 +1,13 @@
 class DatabaseError extends Error {
-  public readonly originalError: unknown;
+  public readonly code: string;
 
-  constructor(message: string, originalError: unknown) {
+  public readonly detail: string | null;
+
+  constructor(message: string, code = 'UNKNOWN', detail: string | null = null) {
     super(message);
     this.name = 'DatabaseError';
-    this.originalError = originalError;
-
-    if (originalError instanceof Error) this.stack = originalError.stack;
+    this.code = code;
+    this.detail = detail;
   }
 }
 

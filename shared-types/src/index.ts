@@ -1,7 +1,1 @@
-import type {UserRole, AuthUser, User} from "./user"
-
-export type {
-  UserRole,
-  AuthUser,
-  User
-}
+export type * from "./user.d.ts";

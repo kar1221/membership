@@ -8,9 +8,7 @@
   "keywords": [],
   "main": "src/index.ts",
   "scripts": {
-    "dev": "concurrently 'npm run ts-watch' 'npm run tailwind'",
-    "tailwind": "npx @tailwindcss/cli -i ./src/css/main.css -o ./src/public/css/main.css --watch",
-    "ts-watch": "nodemon src/index.ts",
+    "dev": "nodemon src/index.ts",
     "db:create": "tsx src/db/createTable.ts",
     "build": "tsc",
     "test": "vitest run",

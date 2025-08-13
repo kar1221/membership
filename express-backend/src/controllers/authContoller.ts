@@ -14,7 +14,7 @@ async function handleSignup(
 
   if (!errors.isEmpty()) {
     res.status(400).json({
-      message: 'Invalid input',
+      message: errors.array().map((err) => err.msg as string),
       data: null
     });
 
@@ -41,13 +41,13 @@ async function handleSignup(
 
         next(new Error('There was some problem logging in.'));
       }
-    });
 
-    res.status(200).json({
-      message: 'Ok',
-      data: {
-        user
-      }
+      res.status(200).json({
+        message: 'Sign Up successful',
+        data: {
+          user
+        }
+      });
     });
   } catch (error) {
     next(error);

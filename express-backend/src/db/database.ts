@@ -31,7 +31,7 @@ class Database {
       return await this.pool.query<T>(query, params);
     } catch (error) {
       logger.error(`Database query error: ${error}`);
-      throw new DatabaseError('Query Failed', error);
+      throw new DatabaseError('Query Failed');
     }
   }
 

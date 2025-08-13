@@ -32,8 +32,8 @@ async function createUser(info: SignUpInfo): Promise<Express.User | null> {
   const { username, password, firstName, lastName, role } = info;
 
   const query = `
-    INSERT INTO users (username, firstName, lastName, password, role)
-    VALUES ($1, $2, $3, $4, $5) RETURNING id, username, firstName, lastName, role, joinedDate; 
+    INSERT INTO users ("username", "firstName", "lastName", "password", "role")
+    VALUES ($1, $2, $3, $4, $5) RETURNING "id", "username", "firstName", "lastName", "role", "joinedDate"; 
     `;
 
   const { rows } = await database.safeQuery<Express.User>(query, [
