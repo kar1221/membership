@@ -1,6 +1,7 @@
-import type { AuthStoreReturn } from '@/types/authStoreReturn';
-import type { ServerResponse } from '@/types/serverResponse';
-import authFetch from '@/utils/authFetch';
+import { authApi } from '@/composable/useAuthApi';
+import type { LoginForm, SignUpForm } from '@/types';
+import type { ServerResponse } from 'shared-types';
+import { AxiosError } from 'axios';
 import { defineStore } from 'pinia';
 import type { User } from 'shared-types';
 
@@ -18,77 +19,72 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    async signUp(userData: {
-      username?: string;
-      password?: string;
-      firstName?: string;
-      lastName?: string;
-    }): Promise<AuthStoreReturn> {
+    async signUp({ username, password, firstName, lastName }: SignUpForm) {
       this.isLoading = true;
-      this.error = null;
 
-      const { data, statusCode } = await authFetch('/signup')
-        .post({
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          username: userData.username,
-          password: userData.password,
-        })
-        .json<ServerResponse<{ user?: User }>>();
-
-      if (!data.value) {
+      try {
+        await authApi.post('/signup', {
+          username,
+          password,
+          firstName,
+          lastName,
+        });
+        await this.fetchUser();
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          this.error = error.response?.data.message;
+        } else {
+          this.error = 'Unexpected error while signing up.';
+        }
+      } finally {
         this.isLoading = false;
-        return {
-          success: false,
-          error: "Unexpected Error. Server didn't return a value",
-        };
       }
-
-      if (statusCode.value && statusCode.value >= 400) {
-        this.isLoading = false;
-        return {
-          success: false,
-          error: data.value.message,
-        };
-      }
-
-      this.isAuthenticated = true;
-      this.isLoading = false;
-      this.user = data.value.data.user;
-      return {
-        success: true,
-      };
     },
 
-    async fetchUser(): Promise<AuthStoreReturn> {
+    async login({ username, password }: LoginForm) {
       this.isLoading = true;
 
-      const { statusCode, data } = await authFetch('/user')
-        .get()
-        .json<ServerResponse<{ user?: User }>>();
-
-      if (statusCode.value && statusCode.value > 400) {
+      try {
+        await authApi.post('/login', {
+          username,
+          password,
+        });
+        await this.fetchUser();
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          this.error = error.response?.data.message;
+        } else {
+          this.error = 'Unexpected error while logging in.';
+        }
+      } finally {
         this.isLoading = false;
-        return {
-          success: false,
-          error: data.value?.message,
-        };
       }
+    },
 
-      if (!data.value) {
+    async fetchUser() {
+      try {
+        const res = await authApi.get<ServerResponse<{ user?: User }>>('/user');
+        this.user = res.data.data?.user;
+        this.isAuthenticated = true;
+      } catch {
+        this.user = null;
+        this.isAuthenticated = false;
+      }
+    },
+
+    async logout() {
+      this.isLoading = true;
+
+      try {
+        await authApi.post('/logout');
+        this.user = null;
+        this.isAuthenticated = false;
+      } catch (error) {
+        if (error instanceof AxiosError) this.error = error.response?.data.message;
+        else this.error = 'Unexpected error while logging out';
+      } finally {
         this.isLoading = false;
-        return {
-          success: false,
-          error: "Unexpected Error. Server didn't return a value",
-        };
       }
-
-      this.isLoading = false;
-      this.user = data.value.data.user;
-      this.isAuthenticated = true;
-      return {
-        success: true,
-      };
     },
   },
 });

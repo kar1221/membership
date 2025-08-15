@@ -8,5 +8,6 @@ const authRoute = Router();
 authRoute.post('/signup', signUpValidationRule, authContoller.handleSignup);
 authRoute.get('/user', authContoller.getUser);
 authRoute.post('/logout', authContoller.logout);
+authRoute.post('/login');
 
 export default authRoute;

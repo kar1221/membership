@@ -12,3 +12,8 @@ export interface User {
 export interface AuthUser extends User {
   password: string;
 }
+
+export interface ServerResponse<T> {
+  message?: string;
+  data?: T | null
+}

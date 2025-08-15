@@ -1,10 +1,30 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 import { useAuthStore } from './stores/authStore';
+import { useErrorStore } from './stores/errorStore';
 
+const toast = useToast();
 const auth = useAuthStore();
+const errorStore = useErrorStore();
 
-onMounted(async () => await auth.fetchUser());
+watch(
+  () => errorStore.error,
+  (err) => {
+    if (!err) return;
+
+    toast.add({
+      title: 'Error',
+      description: err,
+      color: 'error',
+    });
+
+    errorStore.error = null;
+  },
+);
+
+onMounted(async () => {
+  await auth.fetchUser();
+});
 </script>
 
 <template>

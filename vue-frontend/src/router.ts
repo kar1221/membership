@@ -8,11 +8,11 @@ export const router = createRouter({
   routes: setupLayouts(routes),
 });
 
-router.beforeEach(async (to) => {
+router.beforeEach((to) => {
   const auth = useAuthStore();
 
-  if (to.path === '/signup' && auth.isAuthenticated) {
-    await router.push('/');
+  if (to.name === '/signUp/' && auth.isAuthenticated) {
+    return '/';
   }
 });
 

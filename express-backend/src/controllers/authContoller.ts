@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { validationResult } from 'express-validator';
 
 import { createUser, fetchUserForAuth } from '../db/queries';
+import useServerResponse from '../utils/useServerResponse';
 
 import type { NextFunction, Request, Response } from 'express';
 
@@ -12,11 +13,15 @@ async function handleSignup(
 ): Promise<void> {
   const errors = validationResult(req);
 
+  const serverResponse = useServerResponse(res);
+
   if (!errors.isEmpty()) {
-    res.status(400).json({
-      message: errors.array().map((err) => err.msg as string),
-      data: null
-    });
+    serverResponse.badRequest(
+      errors
+        .array()
+        .map((err) => err.msg as string)
+        .join('\n')
+    );
 
     return;
   }
@@ -24,10 +29,7 @@ async function handleSignup(
   const existingUser = await fetchUserForAuth(req.body.username);
 
   if (existingUser) {
-    res.status(400).json({
-      message: 'Username already exists',
-      data: null
-    });
+    serverResponse.badRequest('Username not available');
 
     return;
   }
@@ -45,13 +47,13 @@ async function handleSignup(
 
     req.login(user as Express.User, async (err) => {
       if (err) {
-        res.status(500).json({
-          message: 'There was some problem logging in',
-          data: null
-        });
+        serverResponse.internalServerError('There was some problem logging in');
 
         next(new Error('There was some problem logging in.'));
+        return;
       }
+
+      serverResponse.ok('Sign up successful', { user });
 
       res.status(200).json({
         message: 'Sign Up successful',
@@ -66,18 +68,13 @@ async function handleSignup(
 }
 
 async function getUser(req: Request, res: Response): Promise<void> {
-  if (req.isAuthenticated())
-    res.status(200).json({
-      message: 'Authenticated',
-      data: {
-        user: req.user
-      }
-    });
-  else
-    res.status(401).json({
-      message: 'Not Authenticated',
-      data: null
-    });
+  const serverResponse = useServerResponse(res);
+
+  if (req.isAuthenticated()) {
+    serverResponse.ok('Authenticated', { user: req.user });
+  } else {
+    serverResponse.unauthorized('Session not authenticated');
+  }
 }
 
 async function logout(
@@ -85,16 +82,16 @@ async function logout(
   res: Response,
   next: NextFunction
 ): Promise<void> {
+  const serverResponse = useServerResponse(res);
+
   req.logout((err) => {
     if (err) {
+      serverResponse.internalServerError('Logout failed on server side.');
       next(err);
       return;
     }
 
-    res.status(200).json({
-      message: 'Logout',
-      data: null
-    });
+    serverResponse.ok('Logout successful');
   });
 }
 

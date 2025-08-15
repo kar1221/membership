@@ -1,3 +1,3 @@
 <template>
-  hey
+  <UButton to="/signUp">aaa</UButton>
 </template>

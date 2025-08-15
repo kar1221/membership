@@ -1,4 +1,0 @@
-<template>
-  <UCard>
-  </UCard>
-</template>

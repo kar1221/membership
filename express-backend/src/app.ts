@@ -13,6 +13,7 @@ import httpLogger from './middlewares/httpLogger';
 import ensureUserSafe from './middlewares/safeUser';
 
 import type { NextFunction, Request, Response } from 'express';
+import useServerResponse from './utils/useServerResponse';
 
 const app = express();
 
@@ -82,10 +83,8 @@ if (env.NODE_ENV === 'production') {
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   logger.error(err);
-  res.status(500).json({
-    message: err.message,
-    data: null
-  });
+  const serverResponse = useServerResponse(res);
+  serverResponse.internalServerError(err.message);
 });
 
 export default app;
