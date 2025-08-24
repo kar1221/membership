@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import { useNotify } from '@/composable/useNotify';
+import { router } from '@/router';
+import { useAuthStore } from '@/stores/authStore';
+import type { FormSubmitEvent } from '@nuxt/ui';
 import { reactive } from 'vue';
 import z from 'zod';
 
+const auth = useAuthStore();
+
 const schema = z.object({
-  username: z
-    .string()
-    .min(1, 'Please enter username'),
+  username: z.string().min(1, 'Please enter username'),
   password: z.string().min(1, 'Please enter password'),
 });
 
@@ -35,6 +39,38 @@ const fields: FormField[] = [
     type: 'password',
   },
 ];
+
+const onSubmit = async (event: FormSubmitEvent<Schema>) => {
+  if (auth.isLoggedIn) {
+    useNotify().warning("You've already logged in, redirecting you in 5 second...");
+
+    setTimeout(() => {
+      void (async function () {
+        await router.push('/');
+      })();
+    }, 2000);
+
+    return;
+  }
+
+  await auth.login({
+    username: event.data.username,
+    password: event.data.password,
+  });
+
+  if (auth.error) {
+    useNotify().error(auth.error);
+    return;
+  }
+
+  useNotify().success('Login sucessful, redirecting...');
+
+  setTimeout(() => {
+    void (async function () {
+      await router.push('/');
+    })();
+  }, 2000);
+};
 </script>
 
 <template>
@@ -43,7 +79,7 @@ const fields: FormField[] = [
       <template #header>
         <h2 class="font-primary text-highlighted text-center text-2xl font-bold">Login</h2>
       </template>
-      <UForm :schema="schema" :state="state" class="flex flex-col gap-5">
+      <UForm :schema="schema" :state="state" class="flex flex-col gap-5" @submit="onSubmit">
         <template v-for="field in fields" :key="field.name">
           <UFormField size="xl" :label="field.label" :name="field.name" required>
             <UInput v-model="state[field.name]" size="xl" variant="soft" :type="field.type">

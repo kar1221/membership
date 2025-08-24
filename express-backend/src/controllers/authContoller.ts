@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt';
 import { validationResult } from 'express-validator';
 
-import { createUser, fetchUserForAuth } from '../db/queries';
+import passport from '../config/passport';
+import { createUser, fetchUserDataFromUsername } from '../db/queries';
 import useServerResponse from '../utils/useServerResponse';
 
 import type { NextFunction, Request, Response } from 'express';
@@ -26,7 +27,7 @@ async function handleSignup(
     return;
   }
 
-  const existingUser = await fetchUserForAuth(req.body.username);
+  const existingUser = await fetchUserDataFromUsername(req.body.username);
 
   if (existingUser) {
     serverResponse.badRequest('Username not available');
@@ -54,13 +55,6 @@ async function handleSignup(
       }
 
       serverResponse.ok('Sign up successful', { user });
-
-      res.status(200).json({
-        message: 'Sign Up successful',
-        data: {
-          user
-        }
-      });
     });
   } catch (error) {
     next(error);
@@ -84,19 +78,75 @@ async function logout(
 ): Promise<void> {
   const serverResponse = useServerResponse(res);
 
-  req.logout((err) => {
+  req.logOut((err) => {
     if (err) {
       serverResponse.internalServerError('Logout failed on server side.');
       next(err);
       return;
     }
 
-    serverResponse.ok('Logout successful');
+    req.session.destroy((serr) => {
+      if (serr) {
+        next(serr);
+        return;
+      }
+
+      res.clearCookie('connect.sid');
+      serverResponse.ok('Logout');
+    });
   });
+}
+
+async function handleLogin(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  const serverResponse = useServerResponse(res);
+
+  const error = validationResult(req).array();
+
+  if (error.length > 0) {
+    serverResponse.badRequest(error.map((err) => err.msg as string).join('\n'));
+    return;
+  }
+
+  passport.authenticate(
+    'local',
+    (
+      err: Error | null,
+      user: Express.User,
+      info: { message?: string } | undefined
+    ) => {
+      if (err) {
+        serverResponse.internalServerError(
+          `Authenticate error: ${err.message}`
+        );
+        return;
+      }
+
+      if (!user) {
+        serverResponse.badRequest(info?.message ?? 'Invalid credentials');
+        return;
+      }
+
+      req.logIn(user, (loginErr: Error) => {
+        if (err) {
+          serverResponse.internalServerError(
+            `Login error: ${loginErr.message}`
+          );
+          return;
+        }
+
+        serverResponse.ok('Login Sucessful', { user });
+      });
+    }
+  )(req, res, next);
 }
 
 export default {
   handleSignup,
   getUser,
-  logout
+  logout,
+  handleLogin
 };

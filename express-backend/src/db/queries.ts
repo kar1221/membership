@@ -2,10 +2,10 @@ import Database from './database';
 
 const database = new Database();
 
-async function fetchUserForAuth(username: string): Promise<AuthUser | null> {
-  const { rows } = await database.safeQuery<AuthUser>(
-    'SELECT * FROM users WHERE username = $1',
-    [username]
+async function fetchUserDataFromId(id: number): Promise<Express.User | null> {
+  const { rows } = await database.safeQuery<Express.User>(
+    'SELECT * FROM users WHERE id = $1',
+    [id]
   );
 
   if (rows.length) {
@@ -15,10 +15,12 @@ async function fetchUserForAuth(username: string): Promise<AuthUser | null> {
   return null;
 }
 
-async function fetchUserForSession(id: number): Promise<Express.User | null> {
+async function fetchUserDataFromUsername(
+  username: string
+): Promise<Express.User | null> {
   const { rows } = await database.safeQuery<Express.User>(
-    'SELECT id, username FROM users WHERE id = $1',
-    [id]
+    'SELECT * FROM users WHERE username = $1',
+    [username]
   );
 
   if (rows.length) {
@@ -49,4 +51,4 @@ async function createUser(info: SignUpInfo): Promise<Express.User | null> {
   return null;
 }
 
-export { createUser, fetchUserForAuth, fetchUserForSession };
+export { createUser, fetchUserDataFromId, fetchUserDataFromUsername };

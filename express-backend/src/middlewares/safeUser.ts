@@ -19,8 +19,8 @@ function ensureUserSafe(
   next: NextFunction
 ): void {
   if (req.user && 'password' in req.user) {
-    const { password, ...safeUser } = req.user as AuthUser;
-    req.user = safeUser;
+    const { password, ...safeUser } = req.user;
+    req.user = safeUser as Express.User;
   }
 
   next();

@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import type { AuthUser as IAuthUser, User as IUser } from 'shared-types';
+import type { AuthUser as IAuthUser } from 'shared-types';
 
 declare global {
   namespace Express {
-    interface User extends IUser {}
+    interface User extends IAuthUser {}
   }
-
-  interface AuthUser extends IAuthUser {}
 
   interface SignUpInfo extends Omit<IAuthUser, 'id' | 'joinedDate'> {}
 }
